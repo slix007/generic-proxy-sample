@@ -1,0 +1,52 @@
+version: "3.5"
+
+services:
+
+  db:
+    image: mongo:4.2
+    environment:
+      MONGO_INITDB_DATABASE: keeper
+    volumes:
+      - ./data:/var/lib/mongodb
+    ports:
+      - "27017:27017"
+    depends_on:
+      - mq
+
+  mongo-express:
+    restart: on-failure
+    image: mongo-express:0.54.0
+    container_name: mongo-express
+    depends_on:
+      - db
+    environment:
+      ME_CONFIG_MONGODB_SERVER: db
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_BASICAUTH_USERNAME: ${ME_CONFIG_BASICAUTH_USERNAME-admin}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${ME_CONFIG_BASICAUTH_PASSWORD-admin}
+    ports:
+      - 8081:8081
+    env_file:
+      - .env
+
+  mq:
+    restart: on-failure
+    image: webcenter/activemq:5.14.3
+    ports:
+      # ui
+      - "8161:8161"
+      # jms
+      - "61616:61616"
+    environment:
+      ACTIVEMQ_CONFIG_DEFAULTACCOUNT: "false"
+      ACTIVEMQ_ADMIN_LOGIN: admin
+      ACTIVEMQ_ADMIN_PASSWORD: password
+
+networks:
+  default:
+    name: keeper-web
+    driver: bridge
+# openVPN workaround:
+#    ipam:
+#      config:
+#        - subnet: 172.16.57.0/24

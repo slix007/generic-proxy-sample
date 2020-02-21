@@ -1,0 +1,33 @@
+spring:
+
+  activemq:
+    user: ${mq.user}
+    password: ${mq.pass}
+    in-memory: false
+    broker-url: ${mq.url}
+
+  # Spring JMS Settings
+  jms:
+    listener:
+      auto-startup: true
+      concurrency: 5
+      max-concurrency: 10
+    template:
+      default-destination:
+      delivery-mode: persistent
+      priority: 100
+      receive-timeout: 1000
+      time-to-live: 360000
+
+  data:
+    mongodb:
+      database: ${db.name}
+      port: ${db.server.port}
+      host: ${db.server.host}
+
+logging:
+  pattern:
+    level:
+      - ".=info"
+      - "org.springframework=info"
+      - "org.springframework.data=debug"

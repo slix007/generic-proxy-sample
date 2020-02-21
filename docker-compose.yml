@@ -1,0 +1,51 @@
+version: "3.5"
+
+services:
+
+  db:
+    image: mongo:4.2
+    environment:
+      MONGO_INITDB_DATABASE: keeper
+    volumes:
+      - ./data:/var/lib/mongodb
+    ports:
+      - "27017:27017"
+    depends_on:
+      - mq
+
+  mq:
+    restart: on-failure
+    image: webcenter/activemq:5.14.3
+    ports:
+      # ui
+      - "8161:8161"
+      # jms
+      - "61616:61616"
+    environment:
+      ACTIVEMQ_CONFIG_DEFAULTACCOUNT: "false"
+      ACTIVEMQ_ADMIN_LOGIN: admin
+      ACTIVEMQ_ADMIN_PASSWORD: password
+
+  keeper-app:
+    build:
+      context: keeper-app
+      dockerfile: Dockerfile
+    restart: on-failure
+    image: keeper-app:1.1
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      MQ_USER: admin
+      MQ_PASSWORD: password
+      MQ_HOST: mq
+      MQ_PORT: 61616
+      DB_NAME: keeper
+      DB_HOST: db
+      DB_PORT: 27017
+
+networks:
+  default:
+    name: keeper-web
+    driver: bridge
