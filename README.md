@@ -32,5 +32,5 @@ docker-compose logs | grep keeper-app
 docker-compose down
 ```
 
-#Possible improvements
+## Possible improvements
 The solution can be scaled horizontally by creating several instances of the app.
